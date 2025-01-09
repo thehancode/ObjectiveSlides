@@ -37,6 +37,11 @@ const SlideItem: React.FC<SlideItemProps> = ({ slide, isEditing }) => {
     setSlides((prev) => addChildSlide(prev, slide.id, newId));
   };
 
+  // Creates a new "child" slide
+  const deleteNode = () => {
+    setSlides((prev) => deleteSlide(prev, slide.id));
+  };
+
   // Creates a new "sibling" slide
   const addSibling = () => {
     if (!slide.parentId) {
@@ -50,7 +55,7 @@ const SlideItem: React.FC<SlideItemProps> = ({ slide, isEditing }) => {
   };
 
   return (
-    <div className="border border-red-400 relative flex flex-row justify-start items-start">
+    <div className="border border-red-400 relative flex flex-row justify-start items-start overflow-x-auto">
       <div className="flex flex-col justify-start relative">
         <div className="flex items-center justify-center w-full h-48">
           <textarea
@@ -75,10 +80,13 @@ const SlideItem: React.FC<SlideItemProps> = ({ slide, isEditing }) => {
         ></div>
 
         {/* Invisible clickable top border with fixed height */}
-        <div
-          className="absolute top-0 left-0 w-full h-4 cursor-pointer hover:bg-gray-300"
-          onClick={isEditing ? addChild : undefined}
-        ></div>
+        {slide.children.length == 0 && (
+          <div
+            className="absolute top-0 left-0 w-full h-4 cursor-pointer hover:bg-gray-300"
+            onClick={isEditing ? deleteNode : undefined}
+          ></div>
+        )}
+
       </div>
 
       <div className="flex flex-col">
@@ -117,7 +125,7 @@ function addChildSlide(slides: Slide[], parentId: string, newSlideId: string): S
     if (s.id === parentId) {
       const newChild: Slide = {
         id: newSlideId,
-        text: "New child slide",
+        text: "<>",
         parentId: parentId,
         children: [],
       };
@@ -126,6 +134,19 @@ function addChildSlide(slides: Slide[], parentId: string, newSlideId: string): S
     // otherwise keep searching in children
     return { ...s, children: addChildSlide(s.children, parentId, newSlideId) };
   });
+}
+
+function deleteSlide(slides: Slide[], slideIdToDelete: string): Slide[] {
+  return slides
+    .map((s) => {
+      if (s.id === slideIdToDelete) {
+        // If this slide matches the ID, it should be deleted (excluded in the filtered array)
+        return null;
+      }
+      // Otherwise, keep searching in its children
+      return { ...s, children: deleteSlide(s.children, slideIdToDelete) };
+    })
+    .filter((s) => s !== null); // Remove null entries (deleted slides)
 }
 
 // Add a sibling: we need to find the parent, then insert a new slide in the parent's children
@@ -158,7 +179,7 @@ function addSiblingSlide(
       // We found the parent
       const newSibling: Slide = {
         id: newSlideId,
-        text: "New sibling slide",
+        text: "<>",
         parentId: s.id,
         children: [],
       };
@@ -176,5 +197,6 @@ function addSiblingSlide(
       children: addSiblingSlide(s.children, siblingId, newSlideId, false),
     };
   });
+
 }
 
