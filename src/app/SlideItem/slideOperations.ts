@@ -23,19 +23,21 @@ export function updateSlideText(
 export function addChildSlide(
   slides: Slide[],
   parentId: string,
-  newSlideId: string
+  newSlideId: string,
+  setLastAdded: (id: string) => void
 ): Slide[] {
   return slides.map((s) => {
+    setLastAdded(newSlideId)
     if (s.id === parentId) {
       const newChild: Slide = {
         id: newSlideId,
-        text: "<>",
+        text: "",
         parentId: parentId,
         children: [],
       };
       return { ...s, children: [...s.children, newChild] };
     }
-    return { ...s, children: addChildSlide(s.children, parentId, newSlideId) };
+    return { ...s, children: addChildSlide(s.children, parentId, newSlideId, setLastAdded) };
   });
 }
 
@@ -62,15 +64,17 @@ export function addSiblingSlide(
   slides: Slide[],
   siblingId: string,
   newSlideId: string,
-  isRootSibling: boolean
+  isRootSibling: boolean,
+  setLastAdded: (id: string) => void
 ): Slide[] {
   // If it’s a root sibling, just add at the top level
   if (isRootSibling) {
+    setLastAdded(newSlideId)
     return [
       ...slides,
       {
         id: newSlideId,
-        text: "New root sibling slide",
+        text: "",
         parentId: null,
         children: [],
       },
@@ -84,9 +88,10 @@ export function addSiblingSlide(
     }
     if (s.children.some((child) => child.id === siblingId)) {
       // We found the parent
+      setLastAdded(newSlideId)
       const newSibling: Slide = {
         id: newSlideId,
-        text: "<>",
+        text: "",
         parentId: s.id,
         children: [],
       };
@@ -98,7 +103,7 @@ export function addSiblingSlide(
     // Keep searching down the tree
     return {
       ...s,
-      children: addSiblingSlide(s.children, siblingId, newSlideId, false),
+      children: addSiblingSlide(s.children, siblingId, newSlideId, false, setLastAdded),
     };
   });
 }

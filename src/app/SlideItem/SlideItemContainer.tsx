@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Slide } from "../types";
 import { useSlides } from "../SlideContext";
+import { useLastAdded } from "../LastAddedContext";
 import {
   updateSlideText,
   addChildSlide,
@@ -29,6 +30,7 @@ const SlideItemContainer: React.FC<SlideItemContainerProps> = ({
   isEditing,
 }) => {
   const { setSlides } = useSlides();
+  const { lastAdded, setLastAdded } = useLastAdded();
   const [text, setText] = useState(slide.text);
 
   // Update this slide's text in the global slides state
@@ -40,7 +42,7 @@ const SlideItemContainer: React.FC<SlideItemContainerProps> = ({
   // Creates a new "child" slide
   const handleAddChild = () => {
     const newId = uuidv4();
-    setSlides((prev) => addChildSlide(prev, slide.id, newId));
+    setSlides((prev) => addChildSlide(prev, slide.id, newId, setLastAdded));
   };
 
   // Creates a new sibling slide
@@ -48,10 +50,10 @@ const SlideItemContainer: React.FC<SlideItemContainerProps> = ({
     const newId = uuidv4();
     if (!slide.parentId) {
       // It's a root slide => add another root slide
-      setSlides((prev) => addSiblingSlide(prev, slide.id, newId, true));
+      setSlides((prev) => addSiblingSlide(prev, slide.id, newId, true, setLastAdded));
     } else {
       // A normal sibling
-      setSlides((prev) => addSiblingSlide(prev, slide.id, newId, false));
+      setSlides((prev) => addSiblingSlide(prev, slide.id, newId, false, setLastAdded));
     }
   };
 
@@ -64,6 +66,7 @@ const SlideItemContainer: React.FC<SlideItemContainerProps> = ({
     <SlideItemView
       text={text}
       isEditing={isEditing}
+      isLastAdded={(lastAdded === slide.id)}
       hasChildren={slide.children.length > 0}
       onTextChange={handleTextChange}
       onAddChild={handleAddChild}

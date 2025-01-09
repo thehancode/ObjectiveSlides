@@ -1,11 +1,12 @@
 // src/app/SlideItem/SlideItemView.tsx
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from 'react';
 
 interface SlideItemViewProps {
   text: string;
   isEditing: boolean;
+  isLastAdded: boolean;
   hasChildren: boolean;
   onTextChange: (newText: string) => void;
   onAddSibling?: () => void;
@@ -14,14 +15,10 @@ interface SlideItemViewProps {
   childrenElements?: React.ReactNode;
 }
 
-/**
- * This is the “dumb” or “presentational” component
- * It only knows how to display UI and call the handlers
- * passed in through props.
- */
 const SlideItemView: React.FC<SlideItemViewProps> = ({
   text,
   isEditing,
+  isLastAdded,
   hasChildren,
   onTextChange,
   onAddSibling,
@@ -29,15 +26,45 @@ const SlideItemView: React.FC<SlideItemViewProps> = ({
   onDeleteNode,
   childrenElements,
 }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    // Focus the textarea if the item is the last added
+    if (isLastAdded && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [isLastAdded]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!isEditing) return;
+
+    if (e.key === 'Tab') {
+      e.preventDefault(); // Prevent default tab behavior (focus shifting)
+      if (onAddChild) {
+        onAddChild();
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent default space behavior in certain cases
+      if (onAddSibling) {
+        onAddSibling();
+      }
+    }
+  };
+
   return (
-    <div className="border border-red-400 relative flex flex-row justify-start items-start overflow-x-auto">
+    <div
+      className={`border border-red-400 relative flex flex-row justify-start items-start overflow-x-auto ${isLastAdded ? 'bg-blue-500' : ''
+        }`}
+    >
       <div className="flex flex-col justify-start relative">
         <div className="flex items-center justify-center w-full h-48">
           <textarea
+            ref={textareaRef}
             className="w-64 text-center text-3xl p-2 bg-transparent rounded focus:outline-none resize-y overflow-hidden"
             value={text}
             readOnly={!isEditing}
             onChange={(e) => onTextChange(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
         </div>
 

@@ -2,14 +2,17 @@
 "use client";
 import React, { useState } from "react";
 import { SlideProvider, useSlides } from "./SlideContext";
+import { LastAddedProvider, useLastAdded } from "./LastAddedContext";
 import SlideItemContainer from "./SlideItem/SlideItemContainer";
 import { FaLock, FaUnlock } from "react-icons/fa";
 
 export default function Home() {
   return (
-    <SlideProvider>
-      <MainView />
-    </SlideProvider>
+    <LastAddedProvider>
+      <SlideProvider>
+        <MainView />
+      </SlideProvider>
+    </LastAddedProvider>
   );
 }
 
@@ -38,6 +41,7 @@ function MainView() {
             key={slide.id}
             slide={slide}
             isEditing={isEditing}
+
           />
         ))}
       </div>
