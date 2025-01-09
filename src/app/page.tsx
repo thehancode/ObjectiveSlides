@@ -2,7 +2,7 @@
 "use client";
 import React, { useState } from "react";
 import { SlideProvider, useSlides } from "./SlideContext";
-import SlideItem from "./SlideItem";
+import SlideItemContainer from "./SlideItem/SlideItemContainer";
 import { FaLock, FaUnlock } from "react-icons/fa";
 
 export default function Home() {
@@ -26,15 +26,19 @@ function MainView() {
           onClick={() => setIsEditing(!isEditing)}
         >
           {isEditing ? (
-            <FaUnlock aria-label="unlocked" />
+            <p>HOla</p>
           ) : (
-            <FaLock aria-label="locked" />
+            <p>Hoal</p>
           )}
         </button>
       </div>
       <div className="flex flex-wrap flex-col items-start">
         {slides.map((slide) => (
-          <SlideItem key={slide.id} slide={slide} isEditing={isEditing} />
+          <SlideItemContainer
+            key={slide.id}
+            slide={slide}
+            isEditing={isEditing}
+          />
         ))}
       </div>
     </div>
